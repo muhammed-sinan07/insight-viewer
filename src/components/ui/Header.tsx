@@ -1,11 +1,13 @@
-import { Brain, Menu } from "lucide-react";
+import { Brain, Menu, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link, useLocation } from "react-router-dom";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/analyze", label: "Analyze" },
+  { href: "/history", label: "History" },
   { href: "/about", label: "About" },
 ];
 
@@ -37,39 +39,43 @@ export const Header = () => {
               {item.label}
             </Link>
           ))}
+          <ThemeToggle />
           <Button asChild>
             <Link to="/analyze">Start Analysis</Link>
           </Button>
         </nav>
 
         {/* Mobile Navigation */}
-        <Sheet>
-          <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-[280px] bg-card">
-            <nav className="flex flex-col gap-4 mt-8">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`text-lg font-medium transition-colors hover:text-primary ${
-                    location.pathname === item.href
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <Button asChild className="mt-4">
-                <Link to="/analyze">Start Analysis</Link>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
               </Button>
-            </nav>
-          </SheetContent>
-        </Sheet>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] bg-card">
+              <nav className="flex flex-col gap-4 mt-8">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={`text-lg font-medium transition-colors hover:text-primary ${
+                      location.pathname === item.href
+                        ? "text-primary"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <Button asChild className="mt-4">
+                  <Link to="/analyze">Start Analysis</Link>
+                </Button>
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   );
