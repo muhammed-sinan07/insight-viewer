@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/ui/Header";
 import { Footer } from "@/components/ui/Footer";
 import { Disclaimer } from "@/components/ui/Disclaimer";
+import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import {
   Brain,
   ArrowRight,
@@ -65,6 +66,7 @@ const diseases = [
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <OnboardingTour />
       <Header />
 
       <main className="flex-1">

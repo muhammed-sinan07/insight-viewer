@@ -5,6 +5,7 @@ import { Footer } from "@/components/ui/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -14,8 +15,8 @@ import {
 } from "@/components/ui/select";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { DiseaseType, mockAnalysisResults } from "@/data/mockData";
-import { History as HistoryIcon, Trash2, Eye, Calendar, Brain, FileText } from "lucide-react";
-import { Link } from "react-router-dom";
+import { History as HistoryIcon, Trash2, Eye, Calendar, Brain, FileText, GitCompare } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 export interface AnalysisSession {
   id: string;
@@ -27,6 +28,7 @@ export interface AnalysisSession {
 }
 
 const History = () => {
+  const navigate = useNavigate();
   const [sessions, setSessions] = useLocalStorage<AnalysisSession[]>("analysis-history", [
     // Demo data
     {
@@ -56,6 +58,7 @@ const History = () => {
   ]);
 
   const [filterType, setFilterType] = useState<string>("all");
+  const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
 
   const filteredSessions = filterType === "all" 
     ? sessions 
@@ -96,6 +99,24 @@ const History = () => {
       return <Badge variant="secondary">Moderate</Badge>;
     }
     return <Badge variant="outline">Low Risk</Badge>;
+  };
+
+  const toggleCompareSelection = (id: string) => {
+    setSelectedForCompare((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((s) => s !== id);
+      }
+      if (prev.length >= 2) {
+        return [prev[1], id];
+      }
+      return [...prev, id];
+    });
+  };
+
+  const handleCompare = () => {
+    if (selectedForCompare.length === 2) {
+      navigate(`/compare?scan1=${selectedForCompare[0]}&scan2=${selectedForCompare[1]}`);
+    }
   };
 
   return (
@@ -142,6 +163,17 @@ const History = () => {
             </div>
 
             <div className="flex items-center gap-3">
+              {selectedForCompare.length === 2 && (
+                <Button onClick={handleCompare} className="gap-2">
+                  <GitCompare className="h-4 w-4" />
+                  Compare Selected
+                </Button>
+              )}
+              {selectedForCompare.length === 1 && (
+                <span className="text-sm text-muted-foreground">
+                  Select 1 more scan to compare
+                </span>
+              )}
               <Button variant="outline" asChild>
                 <Link to="/analyze">
                   <Brain className="h-4 w-4 mr-2" />
@@ -193,16 +225,27 @@ const History = () => {
                     exit={{ opacity: 0, x: -100 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Card className="p-5 bg-card hover:bg-secondary/30 transition-colors">
+                    <Card 
+                      className={`p-5 bg-card hover:bg-secondary/30 transition-colors ${
+                        selectedForCompare.includes(session.id) ? "ring-2 ring-primary" : ""
+                      }`}
+                    >
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-3">
-                            <Badge variant="outline">
-                              {getDiseaseLabel(session.diseaseType)}
-                            </Badge>
-                            {getRiskBadge(session.probability)}
-                          </div>
-                          <h4 className="font-semibold text-foreground">
+                        <div className="flex items-start gap-3">
+                          <Checkbox
+                            checked={selectedForCompare.includes(session.id)}
+                            onCheckedChange={() => toggleCompareSelection(session.id)}
+                            className="mt-1"
+                            aria-label={`Select ${session.fileName} for comparison`}
+                          />
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center gap-3">
+                              <Badge variant="outline">
+                                {getDiseaseLabel(session.diseaseType)}
+                              </Badge>
+                              {getRiskBadge(session.probability)}
+                            </div>
+                            <h4 className="font-semibold text-foreground">
                             {session.prediction}
                           </h4>
                           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -214,6 +257,9 @@ const History = () => {
                               <Calendar className="h-4 w-4" />
                               {formatDate(session.date)}
                             </span>
+                          </div>
+                        </div>
+
                           </div>
                         </div>
 
@@ -239,7 +285,6 @@ const History = () => {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                      </div>
                     </Card>
                   </motion.div>
                 ))}
